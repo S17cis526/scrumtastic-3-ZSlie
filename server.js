@@ -1,6 +1,6 @@
 "use strict";
 
-var PORT = 3000;
+var PORT = 3040;
 
 var fs = require('fs');
 var http = require('http');
@@ -9,19 +9,17 @@ var db = new sqlite3.Database('scrumtastic.sqlite3', function(err) {
   if(err) console.error(err);
 });
 
-var router = new (require('./lib/route').Router);
+var router = new (require('./lib/route').Router(db));
 
+// We need CRUD routes for all of these things:
+// Create, read, update, destroy
 router.get('/', function(req, res) {
   fs.readFile('public/index.html', function(err, body){
     res.end(body);
   });
 });
 
-router.get('/app.js', function(req, res) {
-  fs.readFile('public/app.js', function(err, body){
-    res.end(body);
-  });
-});
+router.resource('/projects', './src/resource/project', db);
 
 router.get('/projects', function(req, res) {
   db.all('SELECT * FROM projects', [], function(err, projects){
